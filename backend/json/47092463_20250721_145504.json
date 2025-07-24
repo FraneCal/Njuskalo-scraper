@@ -1,0 +1,41 @@
+{
+  "id": "47092463",
+  "link": "https://www.njuskalo.hr/nekretnine/stan-zagreb-donji-grad-46.00-m2-oglas-47092463",
+  "lokacija": {
+    "lat": 45.8131088561818,
+    "lng": 15.967223157594645,
+    "approximate": false
+  },
+  "naslov": "Stan: Zagreb (Donji grad), 46.00 m2 (prodaja)",
+  "cijena": "253.000 €",
+  "Lokacija": "Grad Zagreb, Donji Grad, Donji grad",
+  "Tip stana": "U stambenoj zgradi",
+  "Broj etaža": "Jednoetažni",
+  "Broj soba": "2-sobni",
+  "Kat": "1.",
+  "Stambena površina": "46,00 m²",
+  "Netto površina": "46,00 m²",
+  "Mogućnost zamjene": "Nije moguća zamjena za drugu nekretninu",
+  "Agencijska provizija": "2 %",
+  "opis": "Prekrasan,miran stan pun potencijala za stanovanje,ili za poslovni prostor, u samom srcu grada Zagreba. U blizini svih sadrzaja,od Trga Bana Josipa Jelacica na 5 min lagane setnje. Sastoji se od spavace sobe,dnevnog boravka,kupaone i kuhinje. Okrenut je na dvoriste zgrade tako da gleda na zelenilo i mir i tisinu,mada je u samom centru grada.",
+  "Grijanje": [
+    "Sustav grijanja: Etažno plinsko centralno",
+    "Klima uređaj: Da"
+  ],
+  "Kupaonica i WC": [
+    "Broj kupaonica s WC-om: 1"
+  ],
+  "naziv_agencije": "CASA della LUCE d.o.o.",
+  "profil_agencije": "https://www.njuskalo.hr/agencija/casa-della-luce",
+  "adresa_agencije": "Adresa:Grad Zagreb, Hrvatska",
+  "telefon": true,
+  "oglas_objavljen": "20.05.2025. u 18:48",
+  "do_isteka": "do prodaje",
+  "oglas_prikazan": "177 puta",
+  "slike": [
+    "https://www.njuskalo.hr/image-xlsize/nekretnine/stan-zagreb-donji-grad-46.00-m2-slika-249874092.jpg",
+    "https://www.njuskalo.hr/image-xlsize/nekretnine/stan-zagreb-donji-grad-46.00-m2-slika-249874093.jpg",
+    "https://www.njuskalo.hr/image-xlsize/nekretnine/stan-zagreb-donji-grad-46.00-m2-slika-249874095.jpg",
+    "https://www.njuskalo.hr/image-xlsize/nekretnine/stan-zagreb-donji-grad-46.00-m2-slika-249874098.jpg"
+  ]
+}
