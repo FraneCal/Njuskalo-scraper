@@ -3,6 +3,7 @@ import sys
 import json
 import time
 import traceback
+import re
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -18,7 +19,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 # Exit codes
 EXIT_SUCCESS = 0
 EXIT_CONFIG_ERROR = 1
-EXIT_NETWORK_ERROR = 2  # Not used here, but reserved
+EXIT_NETWORK_ERROR = 2
 EXIT_PARSING_ERROR = 3
 EXIT_FS_ERROR = 4
 
@@ -58,13 +59,38 @@ try:
         base_filename = os.path.splitext(filename)[0]
         log_filename = generate_log_filename(base_filename)
         log_path = os.path.join(LOG_DIR, log_filename)
-        log_info_path = log_path  # Used in case of global exception
+        log_info_path = log_path
 
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 html = f.read()
 
             soup = BeautifulSoup(html, "html.parser")
+
+            # ID iz naziva datoteke
+            oglas_id = base_filename.split("_")[0]
+            podaci = {"id": oglas_id}
+
+            # Link iz <link rel="canonical"> taga
+            canonical_tag = soup.find("link", rel="canonical")
+            if canonical_tag and canonical_tag.get("href"):
+                podaci["link"] = canonical_tag["href"]
+
+            # Lokacija (lat, lng) iz JavaScript dijela
+            script_tags = soup.find_all("script")
+            for script in script_tags:
+                if script.string:
+                    match = re.search(r'"lat":([\d\.-]+),"lng":([\d\.-]+),"approximate":(true|false)', script.string)
+                    if match:
+                        lat = float(match.group(1))
+                        lng = float(match.group(2))
+                        approximate = match.group(3) == 'true'
+                        podaci["lokacija"] = {
+                            "lat": lat,
+                            "lng": lng,
+                            "approximate": approximate
+                        }
+                        break
 
             # Naslov
             title_tag = soup.find("title")
@@ -74,12 +100,10 @@ try:
             price_tag = soup.select_one("dl.ClassifiedDetailSummary-priceRow dd.ClassifiedDetailSummary-priceDomestic")
             cijena = price_tag.get_text(strip=True) if price_tag else None
 
-            # Osnovni podaci
-            podaci = {
-                "naslov": naslov,
-                "cijena": cijena
-            }
+            podaci["naslov"] = naslov
+            podaci["cijena"] = cijena
 
+            # Osnovni podaci
             info_section = soup.select_one("div.ClassifiedDetailBasicDetails dl.ClassifiedDetailBasicDetails-list")
             if info_section:
                 dt_tags = info_section.find_all("dt")
@@ -124,7 +148,7 @@ try:
 
                 web_tag = owner_section.select_one("a[href^='http']:not([href^='mailto'])")
                 if web_tag:
-                    podaci["web_agencije"] = web_tag.get("href")
+                    podaci["profil_agencije"] = web_tag.get("href")
 
                 email_tag = owner_section.select_one("a[href^='mailto']")
                 if email_tag:
@@ -137,13 +161,29 @@ try:
                 telefon_prisutan = owner_section.select_one(".UserPhoneNumber-callSeller")
                 podaci["telefon"] = bool(telefon_prisutan)
 
+            # Sustavski podaci oglasa (objavljen, ističe, prikazan)
+            system_details = soup.select_one("dl.ClassifiedDetailSystemDetails-list")
+            if system_details:
+                dt_tags = system_details.find_all("dt")
+                dd_tags = system_details.find_all("dd")
+                for dt, dd in zip(dt_tags, dd_tags):
+                    key = dt.get_text(strip=True)
+                    val = dd.get_text(strip=True)
+                    if key and val:
+                        if key == "Oglas objavljen":
+                            podaci["oglas_objavljen"] = val
+                        elif key == "Do isteka još":
+                            podaci["do_isteka"] = val
+                        elif key == "Oglas prikazan":
+                            podaci["oglas_prikazan"] = val
+
             # Slike
             image_tags = soup.select("li[data-media-type='image']")
             slike = [tag.get("data-large-image-url") for tag in image_tags if tag.get("data-large-image-url")]
             podaci["slike"] = slike
 
             # Spremi JSON
-            json_ime = os.path.splitext(filename)[0] + ".json"
+            json_ime = base_filename + ".json"
             json_putanja = os.path.join(OUTPUT_DIR, json_ime)
             with open(json_putanja, "w", encoding="utf-8") as jf:
                 json.dump(podaci, jf, ensure_ascii=False, indent=2)
@@ -160,7 +200,7 @@ try:
             snippet = html[:1000].replace("\n", " ") if 'html' in locals() else "[no HTML loaded]"
             log_error(log_path, f"PARSE {filename} FAILED {trajanje}ms\n{traceback.format_exc()}\nHTML SNIPPET:\n{snippet}")
             exit_code = EXIT_PARSING_ERROR
-            raise e  # Optional: if you want to stop all on one error
+            raise e
 
 except FileNotFoundError as e:
     exit_code = EXIT_CONFIG_ERROR
